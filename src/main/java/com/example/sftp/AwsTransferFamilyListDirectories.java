@@ -29,7 +29,7 @@ public class AwsTransferFamilyListDirectories {
     private static final int SFTP_PORT = 2222;
     private static final String SFTP_USERNAME = "testuser1";
     private static final String SFTP_PASSWORD = "password1";
-    private static final String BUCKET_NAME = "test-bucket";
+    private static final String BUCKET_NAME = "wps-dev-validations-v1";
     private static final String LOCAL_DIR = "/destination/";
     private static final String REMOTE_DIR = "/upload/";
     private static final String ACCESS_ROLE_ARN = "arn:aws:iam::000000000000:role/localstack-role";
@@ -442,7 +442,7 @@ public class AwsTransferFamilyListDirectories {
         }
     }
 
-    private static String startOutboundTransfer(TransferClient transferClient, String connectorId) {
+    public static String startOutboundTransfer(TransferClient transferClient, String connectorId) {
         try {
             StartFileTransferRequest request = StartFileTransferRequest.builder()
                     .connectorId(connectorId)
@@ -474,7 +474,7 @@ public class AwsTransferFamilyListDirectories {
         Sync/Async: Synchronous (blocking call).
      */
 
-    private static void monitorTransfer(TransferClient transferClient, String connectorId, String transferId) {
+    public static void monitorTransfer(TransferClient transferClient, String connectorId, String transferId) {
         try {
             ListFileTransferResultsRequest request = ListFileTransferResultsRequest.builder()
                     .connectorId(connectorId)
@@ -515,12 +515,26 @@ public class AwsTransferFamilyListDirectories {
         }
     }
 
-
+    /*
+        Purpose: Retrieves a list of the contents of a directory from a remote SFTP server.
+        Request: Connector ID and Remote Path of SFTP server.
+        Sample Request:
+                StartDirectoryListingRequest request = StartDirectoryListingRequest.builder()
+                    .connectorId(connectorId)
+                    .outputDirectoryPath("/local-directory-path")
+                    .remoteDirectoryPath(remotePath)
+                    .build();
+        Sample Response: {
+                            "ListingId": "",
+                            "OutputFileName": ""
+                        }
+        Sync/Async: Synchronous (blocking call).
+     */
     public static String startDirectoryListing(TransferClient transferClient, String connectorId, String remotePath) {
         try {
             StartDirectoryListingRequest request = StartDirectoryListingRequest.builder()
                     .connectorId(connectorId)
-                    .outputDirectoryPath("local-directory-path")  // Local path to store the listing results
+                    .outputDirectoryPath("/wps-dev-validations-v1/test-pfs")  // Local path to store the listing results
                     .remoteDirectoryPath(remotePath)  // Path in the remote SFTP server
                     .build();
 
