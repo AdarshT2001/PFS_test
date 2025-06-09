@@ -529,6 +529,7 @@ public class AwsTransferFamilyListDirectories {
                         .connectorId("c-32561b335ad048fe8")
                         .build();
         Sample Response: Deleted connector: c-32561b335ad048fe8
+            If the action is successful, the service sends back an HTTP 200 response with an empty HTTP body.
         Limitations: Deleting a connector may affect ongoing or future file transfers.
         Sync/Async: Synchronous (blocking call).
      */
