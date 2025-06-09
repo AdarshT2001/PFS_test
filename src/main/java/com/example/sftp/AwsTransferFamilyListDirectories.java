@@ -36,9 +36,9 @@ public class AwsTransferFamilyListDirectories {
     private static final int SFTP_PORT = 2222;
     private static final String SFTP_USERNAME = "testuser1";
     private static final String SFTP_PASSWORD = "password1";
-    private static final String BUCKET_NAME = "test-bucket";
-    private static final String LOCAL_DIR = "/destination/";
-    private static final String REMOTE_DIR = "/upload/";
+    private static final String BUCKET_NAME = "wps-dev-validations-v1";
+    private static final String LOCAL_DIR = "/test-pfs/test_may_26.pub";
+    private static final String REMOTE_DIR = "/mft";
     private static final String ACCESS_ROLE_ARN = "arn:aws:iam::000000000000:role/localstack-role";
 
 //    public static void main(String[] args) {
@@ -517,13 +517,31 @@ public class AwsTransferFamilyListDirectories {
         }
     }
 
-    private static String startOutboundTransfer(TransferClient transferClient, String connectorId) {
+    /*
+        startOutboundTransfer
+        Purpose: Starts an SFTP file transfer from S3 to SFTP (outbound transfer).
+        Request: File paths to be transferred and the connector ID.
+        Sample Request:
+                StartFileTransferRequest request = StartFileTransferRequest.builder()
+                        .connectorId("c-32561b335ad048fe8")
+                        .remoteDirectoryPath("/upload/")
+                        .sendFilePaths(List.of("file1.csv"))
+                        .build();
+        Sample Response: Started outbound transfer: transfer-id-123456
+            {
+               "TransferId": "string"
+            }
+        Limitations:
+                Transfers can be interrupted if the connector or SFTP server has issues.
+        Response time: approximately 3s for one file
+        Sync/Async: Asynchronous. (Use startFileTransfer and check the transfer status separately).
+     */
+    public static String startOutboundTransfer(TransferClient transferClient, String connectorId) {
         try {
             StartFileTransferRequest request = StartFileTransferRequest.builder()
                     .connectorId(connectorId)
-                    .localDirectoryPath("s3://" + BUCKET_NAME + LOCAL_DIR)
+                    .sendFilePaths(List.of("/test-pfs/test_may_26.pub"))
                     .remoteDirectoryPath(REMOTE_DIR)
-                    .sendFilePaths(List.of("file2.csv"))
                     .build();
             StartFileTransferResponse response = transferClient.startFileTransfer(request);
             String transferId = response.transferId();
@@ -544,12 +562,24 @@ public class AwsTransferFamilyListDirectories {
                         .transferId("transfer-id-123456")
                         .build();
         Sample Response: File: /upload/file1.csv, Status: SUCCESS
+            {
+               "FileTransferResults": [
+                  {
+                     "FailureCode": "string",
+                     "FailureMessage": "string",
+                     "FilePath": "string",
+                     "StatusCode": "string"
+                  }
+               ],
+               "NextToken": "string"
+            }
         Limitations:
                 Transfer results might not be immediately available.
+        Response time: approximately 3s
         Sync/Async: Synchronous (blocking call).
      */
 
-    private static void monitorTransfer(TransferClient transferClient, String connectorId, String transferId) {
+    public static void monitorTransfer(TransferClient transferClient, String connectorId, String transferId) {
         try {
             ListFileTransferResultsRequest request = ListFileTransferResultsRequest.builder()
                     .connectorId(connectorId)
@@ -574,6 +604,7 @@ public class AwsTransferFamilyListDirectories {
                         .connectorId("c-32561b335ad048fe8")
                         .build();
         Sample Response: Deleted connector: c-32561b335ad048fe8
+            If the action is successful, the service sends back an HTTP 200 response with an empty HTTP body.
         Limitations: Deleting a connector may affect ongoing or future file transfers.
         Sync/Async: Synchronous (blocking call).
      */
@@ -590,12 +621,27 @@ public class AwsTransferFamilyListDirectories {
         }
     }
 
-
+    /*
+        Purpose: Retrieves a list of the contents of a directory from a remote SFTP server.
+        Request: Connector ID and Remote Path of SFTP server.
+        Sample Request:
+                StartDirectoryListingRequest request = StartDirectoryListingRequest.builder()
+                    .connectorId(connectorId)
+                    .outputDirectoryPath("/local-directory-path")
+                    .remoteDirectoryPath(remotePath)
+                    .build();
+        Sample Response: {
+                            "ListingId": "",
+                            "OutputFileName": ""
+                        }
+        Response time: approximately 3s
+        Sync/Async: Asynchronous (non-blocking call).
+     */
     public static String startDirectoryListing(TransferClient transferClient, String connectorId, String remotePath) {
         try {
             StartDirectoryListingRequest request = StartDirectoryListingRequest.builder()
                     .connectorId(connectorId)
-                    .outputDirectoryPath("local-directory-path")  // Local path to store the listing results
+                    .outputDirectoryPath("s3://" + BUCKET_NAME + "/test-pfs/")  // Local path to store the listing results
                     .remoteDirectoryPath(remotePath)  // Path in the remote SFTP server
                     .build();
 
