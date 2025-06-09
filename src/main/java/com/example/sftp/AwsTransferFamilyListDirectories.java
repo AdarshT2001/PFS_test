@@ -1,5 +1,6 @@
 package com.example.sftp;
 
+import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+@Service
 public class AwsTransferFamilyListDirectories {
 
     private static final String ENDPOINT_URL = "http://localhost:4566"; // LocalStack
@@ -32,56 +34,56 @@ public class AwsTransferFamilyListDirectories {
     private static final String REMOTE_DIR = "/upload/";
     private static final String ACCESS_ROLE_ARN = "arn:aws:iam::000000000000:role/localstack-role";
 
-    public static void main(String[] args) {
-        // Initialize AWS clients
-        TransferClient transferClient = createTransferClient();
-        S3Client s3Client = createS3Client();
-        SecretsManagerClient secretsManagerClient = createSecretsManagerClient();
-
-        try {
-            // Create S3 bucket
-//            createS3Bucket(s3Client);
+//    public static void main(String[] args) {
+//        // Initialize AWS clients
+//        TransferClient transferClient = createTransferClient();
+//        S3Client s3Client = createS3Client();
+//        SecretsManagerClient secretsManagerClient = createSecretsManagerClient();
 //
-            // Create secret for SFTP credentials
-//            String secretArn = createSecret(secretsManagerClient);
-
-            // Create SFTP connector
-//            String connectorId = createConnector(transferClient, secretArn);
-            String connectorId = "c-32561b335ad048fe8";
-
-            // List all connectors
-            listConnectors(transferClient);
-
-            // Describe connector
-            describeConnector(transferClient, connectorId);
-
-            //list directories in the SFTP server
-            String res = startDirectoryListing(transferClient, connectorId, REMOTE_DIR);
-            System.out.println("Directory listing started with ID: " + res);
-
-            // Update connector
-//            updateConnector(transferClient, connectorId);
-
-            // Start inbound transfer (SFTP to S3)
-            String inboundTransferId = startInboundTransfer(transferClient, connectorId);
-//            monitorTransfer(transferClient, connectorId, inboundTransferId);
-
-            // Start outbound transfer (S3 to SFTP)
-            String outboundTransferId = startOutboundTransfer(transferClient, connectorId);
-//            monitorTransfer(transferClient, connectorId, outboundTransferId);
-
-            // Delete connector
-//            deleteConnector(transferClient, connectorId);
+//        try {
+//            // Create S3 bucket
+////            createS3Bucket(s3Client);
+////
+//            // Create secret for SFTP credentials
+////            String secretArn = createSecret(secretsManagerClient);
 //
-        } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            transferClient.close();
-            s3Client.close();
-            secretsManagerClient.close();
-        }
-    }
+//            // Create SFTP connector
+////            String connectorId = createConnector(transferClient, secretArn);
+//            String connectorId = "c-32561b335ad048fe8";
+//
+//            // List all connectors
+//            listConnectors(transferClient);
+//
+//            // Describe connector
+//            describeConnector(transferClient, connectorId);
+//
+//            //list directories in the SFTP server
+//            String res = startDirectoryListing(transferClient, connectorId, REMOTE_DIR);
+//            System.out.println("Directory listing started with ID: " + res);
+//
+//            // Update connector
+////            updateConnector(transferClient, connectorId);
+//
+//            // Start inbound transfer (SFTP to S3)
+//            String inboundTransferId = startInboundTransfer(transferClient, connectorId);
+////            monitorTransfer(transferClient, connectorId, inboundTransferId);
+//
+//            // Start outbound transfer (S3 to SFTP)
+//            String outboundTransferId = startOutboundTransfer(transferClient, connectorId);
+////            monitorTransfer(transferClient, connectorId, outboundTransferId);
+//
+//            // Delete connector
+////            deleteConnector(transferClient, connectorId);
+////
+//        } catch (Exception e) {
+//            System.err.println("Error: " + e.getMessage());
+//            e.printStackTrace();
+//        } finally {
+//            transferClient.close();
+//            s3Client.close();
+//            secretsManagerClient.close();
+//        }
+//    }
 
     /*
             Purpose: Initializes the TransferClient using STS (Security Token Service) credentials. This is needed to perform operations in AWS Transfer Family, like creating connectors or starting file transfers.
