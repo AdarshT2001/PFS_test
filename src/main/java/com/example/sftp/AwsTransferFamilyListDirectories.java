@@ -530,6 +530,13 @@ public class AwsTransferFamilyListDirectories {
                         .remoteDirectoryPath("/upload/")
                         .sendFilePaths(List.of("file1.csv"))
                         .build();
+                Request JSON:
+                {
+                    "connectorId": "c-32561b335ad048fe8",
+                    "bucketName": "wps-dev-validations-v1",
+                    "remote-dir":"/sftpfiles",
+                    "sendFilePaths": ["/test-pfs/Output_logs.txt"]
+                }
         Sample Response: Started outbound transfer: transfer-id-123456
             {
                "TransferId": "string"
@@ -539,12 +546,12 @@ public class AwsTransferFamilyListDirectories {
         Response time: approximately 3s for one file
         Sync/Async: Asynchronous. (Use startFileTransfer and check the transfer status separately).
      */
-    public static String startOutboundTransfer(TransferClient transferClient, String connectorId) {
+    public static String startOutboundTransfer(TransferClient transferClient,FileTransferRequest fileTransferRequest) {
         try {
             StartFileTransferRequest request = StartFileTransferRequest.builder()
-                    .connectorId(connectorId)
-                    .sendFilePaths(List.of("/" + BUCKET_NAME + LOCAL_DIR))
-                    .remoteDirectoryPath(REMOTE_DIR)
+                    .connectorId(fileTransferRequest.getConnectorId())
+                    .sendFilePaths(fileTransferRequest.getSendFilePaths())
+                    .remoteDirectoryPath(fileTransferRequest.getRemoteDir())
                     .build();
             StartFileTransferResponse response = transferClient.startFileTransfer(request);
             String transferId = response.transferId();

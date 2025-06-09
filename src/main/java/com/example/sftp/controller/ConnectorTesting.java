@@ -140,15 +140,23 @@ public class ConnectorTesting {
     }
 
     /*
+    sample request:
+    {
+        "connectorId": "c-32561b335ad048fe8",
+        "bucketName": "wps-dev-validations-v1",
+        "remote-dir":"/sftpfiles",
+        "sendFilePaths": ["/test-pfs/Output_logs.txt"]
+    }
+
     * sample response:
     * returns transferId
     * response time: 2.57sec*/
 
-    @GetMapping("/connectors/startOutboundTransfer")
-    public String startOutboundTransfer() {
-        log.info("Starting outbound AWS Transfer Family transfer");
-        TransferClient transferClient = AwsTransferFamilyListDirectories.createTransferClient();
-        return AwsTransferFamilyListDirectories.startOutboundTransfer(transferClient, connectorId);
+    @PostMapping(value = "/outbound/transfer", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String startOutboundTransfer(@RequestBody FileTransferRequest fileTransferRequest){
+        log.info("Starting AWS Transfer Family outbound transfer");
+        TransferClient transferClient = awsTransferFamilyListDirectories.createTransferClient();
+        return awsTransferFamilyListDirectories.startOutboundTransfer(transferClient, fileTransferRequest);
     }
     /*
      sample response:

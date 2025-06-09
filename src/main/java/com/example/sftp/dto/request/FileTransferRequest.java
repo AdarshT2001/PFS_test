@@ -11,4 +11,5 @@ public class FileTransferRequest {
     private String localDir;
     private String remoteDir;
     private List<String> fileNames;
+    private List<String> sendFilePaths;
 }
