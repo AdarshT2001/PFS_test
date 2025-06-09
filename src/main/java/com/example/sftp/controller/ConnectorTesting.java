@@ -33,6 +33,7 @@ public class ConnectorTesting {
 		"url": "sftp://34.226.222.129"
 	}
      ]
+     Response time: 2.25sec
     */
     @GetMapping("/connectors/list")
     public List<ConnectorResponse> listConnectors() {
@@ -63,12 +64,14 @@ public class ConnectorTesting {
         },
         "serviceManagedEgressIpAddresses": "[3.211.82.34, 54.198.172.21, 54.82.183.181]",
         "securityPolicyName": "TransferSFTPConnectorSecurityPolicy-2024-03"
-    }*/
-    @GetMapping(value = "/connectors/description/{connection-id}",  produces = MediaType.APPLICATION_JSON_VALUE)
-    public ConnectorDescriptionResponse getConnectorDescription(@PathVariable("connection-id") String connectionId) {
+    }
+    Response time: 2.27sec
+    */
+    @GetMapping(value = "/connectors/description/{connectorId}",  produces = MediaType.APPLICATION_JSON_VALUE)
+    public ConnectorDescriptionResponse getConnectorDescription(@PathVariable("connectorId") String connectorId) {
         log.info("Getting AWS Transfer Family connector description");
         TransferClient transferClient = awsTransferFamilyListDirectories.createTransferClient();
-        return awsTransferFamilyListDirectories.describeConnector(transferClient, connectionId);
+        return awsTransferFamilyListDirectories.describeConnector(transferClient, connectorId);
     }
 
     /*
@@ -86,6 +89,7 @@ public class ConnectorTesting {
     }
     sample response:
     return the connectorId of the updated connector
+    Response time: 1.65sec
     */
     @PostMapping(value = "/update/connector", produces = MediaType.APPLICATION_JSON_VALUE)
     public String updateConnector(@RequestBody ConnectorUpdateRequest connectorUpdateRequest) {
@@ -104,6 +108,7 @@ public class ConnectorTesting {
     }
     sample response:
     return the transferId of the started transfer
+    response time: 2sec
    */
     @PostMapping(value = "/inbound/transfer", produces = MediaType.APPLICATION_JSON_VALUE)
     public String startInboundTransfer(@RequestBody FileTransferRequest fileTransferRequest){
@@ -125,6 +130,7 @@ public class ConnectorTesting {
       ],
       "NextToken": "string"
     }
+    Response time: 1.8sec
      */
     @GetMapping("/connectors/monitor")
     public void monitorTransfer(@RequestParam(name = "transferId") String transferId) {
@@ -135,7 +141,8 @@ public class ConnectorTesting {
 
     /*
     * sample response:
-    * returns transferId */
+    * returns transferId
+    * response time: 2.57sec*/
 
     @GetMapping("/connectors/startOutboundTransfer")
     public String startOutboundTransfer() {
@@ -144,8 +151,10 @@ public class ConnectorTesting {
         return AwsTransferFamilyListDirectories.startOutboundTransfer(transferClient, connectorId);
     }
     /*
-    * sample response:
-    * returns the ListingId */
+     sample response:
+     returns the ListingId
+     response time: 4.78sec
+    */
 
     @GetMapping("/connectors/startDirectoryListing")
     public String startDirectoryListing() {
