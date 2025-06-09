@@ -1,6 +1,7 @@
 package com.example.sftp;
 
 import com.example.sftp.dto.request.ConnectorUpdateRequest;
+import com.example.sftp.dto.request.FileTransferRequest;
 import com.example.sftp.dto.response.ConnectorDescriptionResponse;
 import com.example.sftp.dto.response.ConnectorResponse;
 import org.springframework.stereotype.Service;
@@ -480,6 +481,12 @@ public class AwsTransferFamilyListDirectories {
         Purpose: Starts an SFTP file transfer from SFTP to S3 (inbound transfer) or from S3 to SFTP (outbound transfer).
         Request: File paths to be transferred and the connector ID.
         Sample Request:
+        {
+            "connectorId": "c-32561b335ad048fe8",
+            "bucketName": "wps-dev-validations-v1",
+            "localDir":"/test-pfs",
+            "fileNames": ["/mft/Output_logs.txt"]
+        }
                 StartFileTransferRequest request = StartFileTransferRequest.builder()
                         .connectorId("c-32561b335ad048fe8")
                         .localDirectoryPath("s3://test-bucket/destination/")
@@ -492,13 +499,13 @@ public class AwsTransferFamilyListDirectories {
         Sync/Async: Asynchronous. (Use startFileTransfer and check the transfer status separately).
      */
 
-    private static String startInboundTransfer(TransferClient transferClient, String connectorId) {
+    public String startInboundTransfer(TransferClient transferClient, FileTransferRequest fileTransferRequest) {
         try {
             StartFileTransferRequest request = StartFileTransferRequest.builder()
-                    .connectorId(connectorId)
-                    .localDirectoryPath("s3://" + BUCKET_NAME + LOCAL_DIR)
-                    .remoteDirectoryPath(REMOTE_DIR)
-                    .retrieveFilePaths(List.of("file1.csv"))
+                    .connectorId(fileTransferRequest.getConnectorId())
+                    .localDirectoryPath("/" + fileTransferRequest.getBucketName() + fileTransferRequest.getLocalDir())
+//                    .remoteDirectoryPath(fileTransferRequest.getRemoteDir())
+                    .retrieveFilePaths(fileTransferRequest.getFileNames())
                     .build();
             StartFileTransferResponse response = transferClient.startFileTransfer(request);
             String transferId = response.transferId();

@@ -3,6 +3,7 @@ package com.example.sftp.controller;
 
 import com.example.sftp.AwsTransferFamilyListDirectories;
 import com.example.sftp.dto.request.ConnectorUpdateRequest;
+import com.example.sftp.dto.request.FileTransferRequest;
 import com.example.sftp.dto.response.ConnectorDescriptionResponse;
 import com.example.sftp.dto.response.ConnectorResponse;
 import lombok.RequiredArgsConstructor;
@@ -39,5 +40,12 @@ public class ConnectorTesting {
         log.info("Updating AWS Transfer Family connector");
         TransferClient transferClient = awsTransferFamilyListDirectories.createTransferClient();
         return awsTransferFamilyListDirectories.updateConnector(transferClient, connectorUpdateRequest);
+    }
+
+    @PostMapping(value = "/inbound/transfer", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String startInboundTransfer(@RequestBody FileTransferRequest fileTransferRequest){
+        log.info("Starting AWS Transfer Family inbound transfer");
+        TransferClient transferClient = awsTransferFamilyListDirectories.createTransferClient();
+        return awsTransferFamilyListDirectories.startInboundTransfer(transferClient, fileTransferRequest);
     }
 }
