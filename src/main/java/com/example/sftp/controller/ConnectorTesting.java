@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import software.amazon.awssdk.services.transfer.TransferClient;
-import software.amazon.awssdk.services.transfer.model.UpdateConnectorRequest;
 
 import java.util.List;
 
@@ -24,6 +23,17 @@ public class ConnectorTesting {
     private static final String remotePath = "/sftpfiles";
 
     private final AwsTransferFamilyListDirectories awsTransferFamilyListDirectories;
+
+    /*
+     Sample response:
+     [
+	{
+		"arn": "arn:aws:transfer:us-east-1:072389562270:connector/c-32561b335ad048fe8",
+		"connectorId": "c-32561b335ad048fe8",
+		"url": "sftp://34.226.222.129"
+	}
+     ]
+    */
     @GetMapping("/connectors/list")
     public List<ConnectorResponse> listConnectors() {
         log.info("Listing AWS Transfer Family connectors");
@@ -31,6 +41,29 @@ public class ConnectorTesting {
         return awsTransferFamilyListDirectories.listConnectors(transferClient);
     }
 
+
+    /*
+    sample request: pass connectionId in path parameter
+    sample response:
+    {
+        "arn": "arn:aws:transfer:us-east-1:072389562270:connector/c-32561b335ad048fe8",
+        "connectorId": "c-32561b335ad048fe8",
+        "url": "sftp://34.226.222.129",
+        "accessRole": "arn:aws:iam::072389562270:role/transfer-s3-role",
+        "loggingRole": "arn:aws:iam::072389562270:role/transfer-s3-role",
+        "tags": {
+            "Name": "wps_external_sftp_server"
+        },
+        "sftpConfig": {
+            "trustedHostKeys": [
+                "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCplbhLwUamb4u+qkVDlLJ8VoKrUixdIQKRbF3UfPfEuOKrIugLb14xeLRmX8CEeo/Srf6PmP8o+3/sph2C/QF27ka8trmPMyro5UOUrci09mjeZf6YO0ICIAYrzGunAqmZUSL3Z/40xJjenDkvBwPNLr17bXHsrH3F2l0uCBbYYkHOIzUD4ge7PgGXMCVnT2WThj4Ho3SJyRYIRbwwvFcNBIPZAP3ood9qQmRRM3KB08E2MOtH3fRDVzyvqu4WRGiMw+GzA92u+xMCjxpzIyINA0Tx3AM8crzuyBMRmvHr1kZRFz/Q5cF7fuCkfIlMWFGutkmIK3Bz7pIBs6lJLHUbBXM2WaPWowBr9IOdyr9JvxXCkR+sX4otzu3ENaiot5uAi0kS8D3hYnS7O35g46hBtazCU0+0yBUTVVxxfAAfgzLelWTboL+Bz1XR8I4umaiTtekyLJ1s55T3dPzrlCCph/UPsS7215954QimnP4DVSXEcgNQTjib7EIWxbUlKBU="
+            ],
+            "userSecretId": "arn:aws:secretsmanager:us-east-1:072389562270:secret:wps_external_sftp_server_user-CkuJ6e",
+            "maxConcurrentConnections": 1
+        },
+        "serviceManagedEgressIpAddresses": "[3.211.82.34, 54.198.172.21, 54.82.183.181]",
+        "securityPolicyName": "TransferSFTPConnectorSecurityPolicy-2024-03"
+    }*/
     @GetMapping(value = "/connectors/description/{connection-id}",  produces = MediaType.APPLICATION_JSON_VALUE)
     public ConnectorDescriptionResponse getConnectorDescription(@PathVariable("connection-id") String connectionId) {
         log.info("Getting AWS Transfer Family connector description");
@@ -38,6 +71,22 @@ public class ConnectorTesting {
         return awsTransferFamilyListDirectories.describeConnector(transferClient, connectionId);
     }
 
+    /*
+    sample request:
+    {
+        "connectorId": "c-32561b335ad048fe8",
+        "sftpConfig": {
+            "trustedHostKeys": [
+                ""
+            ],
+            "userSecretId": "arn:aws:secretsmanager:us-east-1:072389562270:secret:wps_external_sftp_server_user-CkuJ6e",
+            "maxConcurrentConnections": 3
+        },
+        "securityPolicyName": "TransferSFTPConnectorSecurityPolicy-2024-03"
+    }
+    sample response:
+    return the connectorId of the updated connector
+    */
     @PostMapping(value = "/update/connector", produces = MediaType.APPLICATION_JSON_VALUE)
     public String updateConnector(@RequestBody ConnectorUpdateRequest connectorUpdateRequest) {
         log.info("Updating AWS Transfer Family connector");
@@ -45,12 +94,38 @@ public class ConnectorTesting {
         return awsTransferFamilyListDirectories.updateConnector(transferClient, connectorUpdateRequest);
     }
 
+    /*
+    sample request:
+    {
+        "connectorId": "c-32561b335ad048fe8",
+        "bucketName": "wps-dev-validations-v1",
+        "localDir":"/test-pfs",
+        "fileNames": ["/mft/Output_logs.txt"]
+    }
+    sample response:
+    return the transferId of the started transfer
+   */
     @PostMapping(value = "/inbound/transfer", produces = MediaType.APPLICATION_JSON_VALUE)
     public String startInboundTransfer(@RequestBody FileTransferRequest fileTransferRequest){
         log.info("Starting AWS Transfer Family inbound transfer");
         TransferClient transferClient = awsTransferFamilyListDirectories.createTransferClient();
         return awsTransferFamilyListDirectories.startInboundTransfer(transferClient, fileTransferRequest);
     }
+
+    /*
+    sample response:
+    {
+      "FileTransferResults": [
+        {
+          "FailureCode": "string",
+          "FailureMessage": "string",
+          "FilePath": "string",
+          "StatusCode": "string"
+        }
+      ],
+      "NextToken": "string"
+    }
+     */
     @GetMapping("/connectors/monitor")
     public void monitorTransfer(@RequestParam(name = "transferId") String transferId) {
         log.info("Monitoring Transfer");
@@ -58,12 +133,19 @@ public class ConnectorTesting {
         AwsTransferFamilyListDirectories.monitorTransfer(transferClient, connectorId, transferId);
     }
 
+    /*
+    * sample response:
+    * returns transferId */
+
     @GetMapping("/connectors/startOutboundTransfer")
     public String startOutboundTransfer() {
         log.info("Starting outbound AWS Transfer Family transfer");
         TransferClient transferClient = AwsTransferFamilyListDirectories.createTransferClient();
         return AwsTransferFamilyListDirectories.startOutboundTransfer(transferClient, connectorId);
     }
+    /*
+    * sample response:
+    * returns the ListingId */
 
     @GetMapping("/connectors/startDirectoryListing")
     public String startDirectoryListing() {
