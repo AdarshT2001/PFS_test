@@ -38,7 +38,7 @@ public class AwsTransferFamilyListDirectories {
     private static final String SFTP_PASSWORD = "password1";
     private static final String BUCKET_NAME = "wps-dev-validations-v1";
     private static final String LOCAL_DIR = "/test-pfs/test_may_26.pub";
-    private static final String REMOTE_DIR = "/mft";
+    private static final String REMOTE_DIR = "/sftpfiles";
     private static final String ACCESS_ROLE_ARN = "arn:aws:iam::000000000000:role/localstack-role";
 
 //    public static void main(String[] args) {
@@ -540,7 +540,7 @@ public class AwsTransferFamilyListDirectories {
         try {
             StartFileTransferRequest request = StartFileTransferRequest.builder()
                     .connectorId(connectorId)
-                    .sendFilePaths(List.of("/test-pfs/test_may_26.pub"))
+                    .sendFilePaths(List.of("/" + BUCKET_NAME + LOCAL_DIR))
                     .remoteDirectoryPath(REMOTE_DIR)
                     .build();
             StartFileTransferResponse response = transferClient.startFileTransfer(request);
@@ -641,7 +641,7 @@ public class AwsTransferFamilyListDirectories {
         try {
             StartDirectoryListingRequest request = StartDirectoryListingRequest.builder()
                     .connectorId(connectorId)
-                    .outputDirectoryPath("s3://" + BUCKET_NAME + "/test-pfs/")  // Local path to store the listing results
+                    .outputDirectoryPath("/" + BUCKET_NAME + "/test-pfs")  // Local path to store the listing results
                     .remoteDirectoryPath(remotePath)  // Path in the remote SFTP server
                     .build();
 

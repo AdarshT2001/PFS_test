@@ -21,7 +21,7 @@ import java.util.List;
 @Slf4j
 public class ConnectorTesting {
     private static final String connectorId = "c-32561b335ad048fe8";
-    private static final String remotePath = "/mft";
+    private static final String remotePath = "/sftpfiles";
 
     private final AwsTransferFamilyListDirectories awsTransferFamilyListDirectories;
     @GetMapping("/connectors/list")
