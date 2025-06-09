@@ -40,6 +40,9 @@ public class AwsTransferFamilyListDirectories {
     private static final String LOCAL_DIR = "/test-pfs/test_may_26.pub";
     private static final String REMOTE_DIR = "/sftpfiles";
     private static final String ACCESS_ROLE_ARN = "arn:aws:iam::000000000000:role/localstack-role";
+    private static final String TEST_SECRET_ID = "";
+    private static final String TEST_ACC_KEY = "";
+    private static final String TEST_SECRET_KEY = "";
 
 //    public static void main(String[] args) {
 //        // Initialize AWS clients
@@ -96,7 +99,7 @@ public class AwsTransferFamilyListDirectories {
             Purpose: Initializes the TransferClient using STS (Security Token Service) credentials. This is needed to perform operations in AWS Transfer Family, like creating connectors or starting file transfers.
             Request: None (uses AWS credentials and assumes a role).
             Response: A TransferClient instance that can be used to interact with the AWS Transfer Family service.
-            Sample Request: AWS credentials (accessKey and secretKey), along with the IAM Role ARN to assume a role.
+            Sample Request: AWS credentials (TEST_ACC_KEY and TEST_SECRET_KEY), along with the IAM Role ARN to assume a role.
             Sample Response: A TransferClient instance configured with the provided credentials.
             Limitations:
                 This is synchronous by default.
@@ -109,7 +112,7 @@ public class AwsTransferFamilyListDirectories {
         try {
             StsClient stsClient = StsClient.builder()
                     .region(Region.of(REGION))
-                    .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
+                    .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(TEST_ACC_KEY, TEST_SECRET_KEY)))
                     .build();
 
             AssumeRoleRequest assumeRoleRequest = AssumeRoleRequest.builder()
@@ -128,7 +131,7 @@ public class AwsTransferFamilyListDirectories {
             return TransferClient.builder()
                     .region(Region.of(REGION))
                     .credentialsProvider(stsAssumeRoleCredentialsProvider)
-//                    .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
+//                    .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(TEST_ACC_KEY, TEST_SECRET_KEY)))
 //                    .endpointOverride(URI.create(ENDPOINT_URL))
                     .build();
         } catch (Exception e) {
@@ -156,7 +159,7 @@ public class AwsTransferFamilyListDirectories {
 
             StsClient stsClient = StsClient.builder()
                     .region(Region.of(REGION))
-                    .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
+                    .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(TEST_ACC_KEY, TEST_SECRET_KEY)))
                     .build();
 
             AssumeRoleRequest assumeRoleRequest = AssumeRoleRequest.builder()
@@ -201,7 +204,7 @@ public class AwsTransferFamilyListDirectories {
         try {
             StsClient stsClient = StsClient.builder()
                     .region(Region.of(REGION))
-                    .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
+                    .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(TEST_ACC_KEY, TEST_SECRET_KEY)))
                     .build();
 
             AssumeRoleRequest assumeRoleRequest = AssumeRoleRequest.builder()
@@ -273,7 +276,7 @@ public class AwsTransferFamilyListDirectories {
         try {
             Map<String, String> credentials = Map.of("username", SFTP_USERNAME, "password", SFTP_PASSWORD);
             CreateSecretRequest request = CreateSecretRequest.builder()
-                    .name(secretId)
+                    .name(TEST_SECRET_ID)
                     .secretString(credentials.toString())
                     .description("SFTP credentials")
                     .build();
@@ -312,7 +315,7 @@ public class AwsTransferFamilyListDirectories {
         try {
             SftpConnectorConfig sftpConfig = SftpConnectorConfig.builder()
                     .maxConcurrentConnections(5)
-                    .userSecretId(secretId)
+                    .userSecretId(TEST_SECRET_ID)
                     .build();
             CreateConnectorRequest request = CreateConnectorRequest.builder()
                     .accessRole(ACCESS_ROLE_ARN)
