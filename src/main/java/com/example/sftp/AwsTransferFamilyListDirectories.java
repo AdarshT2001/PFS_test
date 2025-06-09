@@ -1,5 +1,7 @@
 package com.example.sftp;
 
+import com.example.sftp.dto.response.ConnectorDescriptionResponse;
+import com.example.sftp.dto.response.ConnectorResponse;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -16,9 +18,12 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.transfer.model.Tag;
 
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Service
 public class AwsTransferFamilyListDirectories {
@@ -331,46 +336,94 @@ public class AwsTransferFamilyListDirectories {
                 ListConnectorsRequest request = ListConnectorsRequest.builder().maxResults(10).build();
                 ListConnectorsResponse response = transferClient.listConnectors(request);
         Sample Response: Connector ID: c-32561b335ad048fe8, ARN: arn:aws:transfer:us-east-1:123456789012:connector/c-32561b335ad048fe8
+        [
+            {
+                "arn": "",
+                "connectorId": "",
+                "url": ""
+            }
+        ]
         Limitations:
                 Pagination: You may need to handle pagination if there are more connectors than the maximum number (maxResults).
         Sync/Async: Synchronous (blocking call).
      */
 
-    public static void listConnectors(TransferClient transferClient) {
+    public List<ConnectorResponse> listConnectors(TransferClient transferClient) {
         try {
             ListConnectorsRequest request = ListConnectorsRequest.builder().maxResults(10).build();
             ListConnectorsResponse response = transferClient.listConnectors(request);
-            response.connectors().forEach(connector ->
-                    System.out.println("Connector ID: " + connector.connectorId() + ", ARN: " + connector.arn())
-            );
+            return response.connectors().stream().map(connector ->
+                    ConnectorResponse.builder()
+                            .connectorId(connector.connectorId())
+                            .arn(connector.arn())
+                            .url(connector.url())
+                            .build()
+            ).toList();
         } catch (Exception e) {
             System.err.println("Failed to list connectors: " + e.getMessage());
+            return null;
         }
     }
 
     /*
         Purpose: Retrieves detailed information about a specific connector.
         Request: Connector ID.
-        Sample Request:
+        Sample Request: Retrieves connector-id from path variable
                 DescribeConnectorRequest request = DescribeConnectorRequest.builder()
                         .connectorId("c-32561b335ad048fe8")
                         .build();
-        Sample Response: Connector Details: Connector [id=c-32561b335ad048fe8, roleArn=arn:aws:iam::123456789012:role/TransferRole]
+        Sample Response:
+        {
+            "arn": "",
+            "connectorId": "",
+            "url": "",
+            "accessRole": "",
+            "loggingRole": "",
+            "tags": {
+                "Name": "wps_external_sftp_server"
+            },
+            "sftpConfig": {
+                "trustedHostKeys": [
+                    ""
+                ],
+                "userSecretId": "",
+                "maxConcurrentConnections": 1
+            },
+            "serviceManagedEgressIpAddresses": "[]",
+            "securityPolicyName": ""
+        }
         Limitations:
                 Connector details depend on its configuration, and the response may not contain data if the connector is misconfigured.
         Sync/Async: Synchronous (blocking call).
      */
 
-    private static void describeConnector(TransferClient transferClient, String connectorId) {
+    public ConnectorDescriptionResponse describeConnector(TransferClient transferClient, String connectorId) {
         try {
             DescribeConnectorRequest request = DescribeConnectorRequest.builder()
                     .connectorId(connectorId)
                     .build();
             DescribeConnectorResponse response = transferClient.describeConnector(request);
             DescribedConnector connector = response.connector();
+            Map<String, Object> sftpConfigMap = convertSftpConfigToMap(connector.sftpConfig());
+
+            Map<String, String> tagsMap = connector.tags().stream()
+                    .collect(Collectors.toMap(Tag::key, Tag::value));
             System.out.println("Connector Details: " + connector);
+            return ConnectorDescriptionResponse.builder()
+                    .arn(connector.arn())
+                    .connectorId(connector.connectorId())
+                    .url(connector.url())
+                    .accessRole(connector.accessRole())
+                    .loggingRole(connector.loggingRole())
+                    .sftpConfig(sftpConfigMap)
+                    .securityPolicyName(connector.securityPolicyName())
+                    .serviceManagedEgressIpAddresses(Arrays.toString(connector.serviceManagedEgressIpAddresses().toArray(new String[0])))
+                    .tags(tagsMap)
+                    .build();
+
         } catch (Exception e) {
             System.err.println("Failed to describe connector: " + e.getMessage());
+            return null;
         }
     }
 
@@ -533,5 +586,19 @@ public class AwsTransferFamilyListDirectories {
             System.err.println("Error starting directory listing: " + e.getMessage());
             return null;
         }
+    }
+
+    private static Map<String, Object> convertSftpConfigToMap(SftpConnectorConfig sftpConfig) {
+        if (sftpConfig == null) {
+            return new HashMap<>();
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("userSecretId", sftpConfig.userSecretId());
+        map.put("trustedHostKeys", sftpConfig.trustedHostKeys());
+        map.put("maxConcurrentConnections", sftpConfig.maxConcurrentConnections());
+        // Add other fields from SftpConnectorConfig as necessary
+
+        return map;
     }
 }
