@@ -96,7 +96,7 @@ public class AwsTransferFamilyListDirectories {
             Sync/Async: Synchronous (blocking call).
      */
 
-    private static TransferClient createTransferClient() {
+    public static TransferClient createTransferClient() {
         try {
             StsClient stsClient = StsClient.builder()
                     .region(Region.of(REGION))
@@ -334,7 +334,7 @@ public class AwsTransferFamilyListDirectories {
         Sync/Async: Synchronous (blocking call).
      */
 
-    private static void listConnectors(TransferClient transferClient) {
+    public static void listConnectors(TransferClient transferClient) {
         try {
             ListConnectorsRequest request = ListConnectorsRequest.builder().maxResults(10).build();
             ListConnectorsResponse response = transferClient.listConnectors(request);
