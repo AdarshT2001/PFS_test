@@ -4,9 +4,7 @@ package com.example.sftp.controller;
 import com.example.sftp.AwsTransferFamilyListDirectories;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import software.amazon.awssdk.services.transfer.TransferClient;
 
 @RestController
@@ -15,7 +13,7 @@ import software.amazon.awssdk.services.transfer.TransferClient;
 @Slf4j
 public class ConnectorTesting {
     private static final String connectorId = "c-32561b335ad048fe8";
-    private static final String remotePath = "/mft/test-listing";
+    private static final String remotePath = "/mft";
 
     private final AwsTransferFamilyListDirectories awsTransferFamilyListDirectories;
     @GetMapping("/connectors/list")
@@ -26,8 +24,7 @@ public class ConnectorTesting {
     }
 
     @GetMapping("/connectors/monitor")
-    public void monitorTransfer() {
-        String transferId = "";
+    public void monitorTransfer(@RequestParam(name = "transferId") String transferId) {
         log.info("Monitoring Transfer");
         TransferClient transferClient = AwsTransferFamilyListDirectories.createTransferClient();
         AwsTransferFamilyListDirectories.monitorTransfer(transferClient, connectorId, transferId);
