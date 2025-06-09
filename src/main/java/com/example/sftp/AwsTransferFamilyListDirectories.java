@@ -1,5 +1,6 @@
 package com.example.sftp;
 
+import com.example.sftp.dto.request.ConnectorUpdateRequest;
 import com.example.sftp.dto.response.ConnectorDescriptionResponse;
 import com.example.sftp.dto.response.ConnectorResponse;
 import org.springframework.stereotype.Service;
@@ -431,6 +432,17 @@ public class AwsTransferFamilyListDirectories {
         Purpose: Updates an existing Transfer Family connector's configuration.
         Request: Connector ID and the updated configurations (e.g., increasing maxConcurrentConnections).
         Sample Request:
+        {
+            "connectorId": "",
+            "sftpConfig": {
+                "trustedHostKeys": [
+                    ""
+                ],
+                "userSecretId": "",
+                "maxConcurrentConnections": 3
+            },
+            "securityPolicyName": ""
+        }
                 UpdateConnectorRequest request = UpdateConnectorRequest.builder()
                         .connectorId("c-32561b335ad048fe8")
                         .securityPolicyName("TransferSecurityPolicy-2022-10")
@@ -444,20 +456,23 @@ public class AwsTransferFamilyListDirectories {
         Sync/Async: Synchronous (blocking call).
      */
 
-    private static void updateConnector(TransferClient transferClient, String connectorId) {
+    public String updateConnector(TransferClient transferClient, ConnectorUpdateRequest connectorUpdateRequest) {
         try {
             UpdateConnectorRequest request = UpdateConnectorRequest.builder()
-                    .connectorId(connectorId)
-                    .securityPolicyName("TransferSecurityPolicy-2022-10")
+                    .connectorId(connectorUpdateRequest.getConnectorId())
+                    .securityPolicyName(connectorUpdateRequest.getSecurityPolicyName())
                     .sftpConfig(SftpConnectorConfig.builder()
-                            .userSecretId(secretId)
-                            .maxConcurrentConnections(3)
+                            .userSecretId(connectorUpdateRequest.getUserSecretId())
+                            .maxConcurrentConnections(connectorUpdateRequest.getMaxConcurrentConnections())
                             .build())
                     .build();
             UpdateConnectorResponse response = transferClient.updateConnector(request);
             System.out.println("Updated connector: " + response.connectorId());
+            return response.connectorId();
+
         } catch (Exception e) {
             System.err.println("Failed to update connector: " + e.getMessage());
+            return null;
         }
     }
     /*

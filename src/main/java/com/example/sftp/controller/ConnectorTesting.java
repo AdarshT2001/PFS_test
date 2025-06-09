@@ -2,18 +2,15 @@ package com.example.sftp.controller;
 
 
 import com.example.sftp.AwsTransferFamilyListDirectories;
+import com.example.sftp.dto.request.ConnectorUpdateRequest;
 import com.example.sftp.dto.response.ConnectorDescriptionResponse;
 import com.example.sftp.dto.response.ConnectorResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import software.amazon.awssdk.services.transfer.TransferClient;
-import software.amazon.awssdk.services.transfer.model.DescribeConnectorResponse;
-import software.amazon.awssdk.services.transfer.model.ListConnectorsResponse;
+import software.amazon.awssdk.services.transfer.model.UpdateConnectorRequest;
 
 import java.util.List;
 
@@ -37,6 +34,10 @@ public class ConnectorTesting {
         return awsTransferFamilyListDirectories.describeConnector(transferClient, connectionId);
     }
 
-
-
+    @PostMapping(value = "/update/connector", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String updateConnector(@RequestBody ConnectorUpdateRequest connectorUpdateRequest) {
+        log.info("Updating AWS Transfer Family connector");
+        TransferClient transferClient = awsTransferFamilyListDirectories.createTransferClient();
+        return awsTransferFamilyListDirectories.updateConnector(transferClient, connectorUpdateRequest);
+    }
 }
