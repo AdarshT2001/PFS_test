@@ -161,6 +161,14 @@ public class ConnectorTesting {
         return awsTransferFamilyListDirectories.startOutboundTransfer(transferClient, fileTransferRequest);
     }
     /*
+    Sample request:
+            {
+            "connectorId": "c-32561b335ad048fe8",
+            "remoteDirectoryPath": "/sftpfiles",
+            "maxItems": 10,
+            "outputDirectoryPath": "/wps-dev-validations-v1/test"
+
+        }
      sample response:
      returns the ListingId
      response time: 4.78sec
