@@ -4,6 +4,9 @@ import com.example.sftp.dto.request.ConnectorUpdateRequest;
 import com.example.sftp.dto.request.FileTransferRequest;
 import com.example.sftp.dto.response.ConnectorDescriptionResponse;
 import com.example.sftp.dto.response.ConnectorResponse;
+import com.example.sftp.dto.response.DirectoryListingResponse;
+import com.example.sftp.dto.response.MonitoringTransferResultsResponse;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -20,10 +23,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.transfer.model.Tag;
 
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -589,22 +589,33 @@ public class AwsTransferFamilyListDirectories {
         Sync/Async: Synchronous (blocking call).
      */
 
-    public static void monitorTransfer(TransferClient transferClient, String connectorId, String transferId) {
+    public static List<MonitoringTransferResultsResponse> monitorTransfer(TransferClient transferClient, String connectorId, String transferId) {
         try {
             ListFileTransferResultsRequest request = ListFileTransferResultsRequest.builder()
                     .connectorId(connectorId)
                     .transferId(transferId)
                     .maxResults(10)
                     .build();
+
+            List<MonitoringTransferResultsResponse> results = new ArrayList<>();
             ListFileTransferResultsResponse response = transferClient.listFileTransferResults(request);
             response.fileTransferResults().forEach(result -> {
+                val resp = MonitoringTransferResultsResponse.builder()
+                        .filePath(result.filePath())
+                        .statusCode(result.statusCode())
+                        .failureCode(result.failureCode())
+                        .failureMessage(result.failureMessage())
+                        .build();
+                results.add(resp);
                 System.out.println("File: " + result.filePath() + ", Status: " + result.statusCode());
                 System.out.println("Failure code: " + result.failureCode() + ", Failure message: " + result.failureMessage());
             });
+            return results;
         } catch (Exception e) {
             System.err.println("Failed to monitor transfer: " + e.getMessage());
             System.out.println("Mock transfer status: COMPLETED for transfer ID " + transferId);
         }
+        return null;
     }
     /*
         Purpose: Deletes an existing connector.
@@ -647,7 +658,7 @@ public class AwsTransferFamilyListDirectories {
         Response time: approximately 3s
         Sync/Async: Asynchronous (non-blocking call).
      */
-    public static String startDirectoryListing(TransferClient transferClient, String connectorId, String remotePath) {
+    public static DirectoryListingResponse startDirectoryListing(TransferClient transferClient, String connectorId, String remotePath) {
         try {
             StartDirectoryListingRequest request = StartDirectoryListingRequest.builder()
                     .connectorId(connectorId)
@@ -659,7 +670,7 @@ public class AwsTransferFamilyListDirectories {
             StartDirectoryListingResponse response = transferClient.startDirectoryListing(request);
 
             // Return the listing ID to track the status
-            return response.outputFileName();
+            return DirectoryListingResponse.builder().ListingId(response.listingId()).outputFileName(response.outputFileName()).build();
         } catch (Exception e) {
             System.err.println("Error starting directory listing: " + e.getMessage());
             return null;

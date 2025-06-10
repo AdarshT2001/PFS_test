@@ -6,6 +6,8 @@ import com.example.sftp.dto.request.ConnectorUpdateRequest;
 import com.example.sftp.dto.request.FileTransferRequest;
 import com.example.sftp.dto.response.ConnectorDescriptionResponse;
 import com.example.sftp.dto.response.ConnectorResponse;
+import com.example.sftp.dto.response.DirectoryListingResponse;
+import com.example.sftp.dto.response.MonitoringTransferResultsResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -133,10 +135,10 @@ public class ConnectorTesting {
     Response time: 1.8sec
      */
     @GetMapping("/connectors/monitor")
-    public void monitorTransfer(@RequestParam(name = "transferId") String transferId) {
+    public List<MonitoringTransferResultsResponse> monitorTransfer(@RequestParam(name = "transferId") String transferId) {
         log.info("Monitoring Transfer");
         TransferClient transferClient = AwsTransferFamilyListDirectories.createTransferClient();
-        AwsTransferFamilyListDirectories.monitorTransfer(transferClient, connectorId, transferId);
+        return AwsTransferFamilyListDirectories.monitorTransfer(transferClient, connectorId, transferId);
     }
 
     /*
@@ -165,7 +167,7 @@ public class ConnectorTesting {
     */
 
     @GetMapping("/connectors/startDirectoryListing")
-    public String startDirectoryListing() {
+    public DirectoryListingResponse startDirectoryListing() {
         log.info("Starting directory listing AWS Transfer Family transfer");
         TransferClient transferClient = AwsTransferFamilyListDirectories.createTransferClient();
         return AwsTransferFamilyListDirectories.startDirectoryListing(transferClient, connectorId, remotePath);
