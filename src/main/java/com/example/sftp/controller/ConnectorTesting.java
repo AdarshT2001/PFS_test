@@ -166,6 +166,22 @@ public class ConnectorTesting {
      response time: 4.78sec
     */
 
+    /*
+     sample request:
+     {
+        "connectorId": "c-32561b335ad048fe8",
+        "bucketName": "wps-dev-validations-v1",
+        "remoteDirectoryPath": "/sftpfiles/outbound_test",
+        "outputDirectoryPath": "/wps-dev-validations-v1/test-pfs",
+            "maxItems": 1
+      }
+
+      sample response:
+      {
+        "outputFileName": "c-32561b335ad048fe8-67426196-d2af-44c8-83ac-6f69457dd34a.json",
+        "listingId": "67426196-d2af-44c8-83ac-6f69457dd34a"
+      }
+     */
     @PostMapping("/connectors/startDirectoryListing")
     public DirectoryListingResponse startDirectoryListing(@RequestBody DirectoryListingRequest directoryListingRequest) {
         log.info("Starting directory listing AWS Transfer Family transfer");
