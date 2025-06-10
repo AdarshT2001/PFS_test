@@ -3,6 +3,7 @@ package com.example.sftp.controller;
 
 import com.example.sftp.AwsTransferFamilyListDirectories;
 import com.example.sftp.dto.request.ConnectorUpdateRequest;
+import com.example.sftp.dto.request.DirectoryListingRequest;
 import com.example.sftp.dto.request.FileTransferRequest;
 import com.example.sftp.dto.response.ConnectorDescriptionResponse;
 import com.example.sftp.dto.response.ConnectorResponse;
@@ -166,9 +167,9 @@ public class ConnectorTesting {
     */
 
     @PostMapping("/connectors/startDirectoryListing")
-    public DirectoryListingResponse startDirectoryListing(@RequestBody FileTransferRequest fileTransferRequest) {
+    public DirectoryListingResponse startDirectoryListing(@RequestBody DirectoryListingRequest directoryListingRequest) {
         log.info("Starting directory listing AWS Transfer Family transfer");
         TransferClient transferClient = AwsTransferFamilyListDirectories.createTransferClient();
-        return AwsTransferFamilyListDirectories.startDirectoryListing(transferClient,fileTransferRequest);
+        return AwsTransferFamilyListDirectories.startDirectoryListing(transferClient,directoryListingRequest);
     }
 }
