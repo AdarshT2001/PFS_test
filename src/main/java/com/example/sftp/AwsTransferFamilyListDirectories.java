@@ -659,7 +659,7 @@ public class AwsTransferFamilyListDirectories {
             StartDirectoryListingResponse response = transferClient.startDirectoryListing(request);
 
             // Return the listing ID to track the status
-            return response.listingId();
+            return response.outputFileName();
         } catch (Exception e) {
             System.err.println("Error starting directory listing: " + e.getMessage());
             return null;
