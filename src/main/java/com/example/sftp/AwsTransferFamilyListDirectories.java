@@ -1,6 +1,7 @@
 package com.example.sftp;
 
 import com.example.sftp.dto.request.ConnectorUpdateRequest;
+import com.example.sftp.dto.request.DirectoryListingRequest;
 import com.example.sftp.dto.request.FileTransferRequest;
 import com.example.sftp.dto.response.ConnectorDescriptionResponse;
 import com.example.sftp.dto.response.ConnectorResponse;
@@ -658,12 +659,13 @@ public class AwsTransferFamilyListDirectories {
         Response time: approximately 3s
         Sync/Async: Asynchronous (non-blocking call).
      */
-    public static DirectoryListingResponse startDirectoryListing(TransferClient transferClient, FileTransferRequest fileTransferRequest) {
+    public static DirectoryListingResponse startDirectoryListing(TransferClient transferClient, DirectoryListingRequest directoryListingRequest) {
         try {
             StartDirectoryListingRequest request = StartDirectoryListingRequest.builder()
-                    .connectorId(fileTransferRequest.getConnectorId())
-                    .outputDirectoryPath("/" + fileTransferRequest.getBucketName() + fileTransferRequest.getLocalDir())  // Local path to store the listing results "/test-pfs"
-                    .remoteDirectoryPath(fileTransferRequest.getRemoteDir())  // Path in the remote SFTP server where files are fetched from
+                    .connectorId(directoryListingRequest.getConnectorId())
+                    .outputDirectoryPath(directoryListingRequest.getOutputDirectoryPath())  // Local path to store the listing results "/test-pfs"
+                    .remoteDirectoryPath(directoryListingRequest.getRemoteDirectoryPath())  // Path in the remote SFTP server where files are fetched from
+                    .maxItems(directoryListingRequest.getMaxItems())
                     .build();
 
             // Start directory listing
