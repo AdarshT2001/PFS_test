@@ -658,12 +658,12 @@ public class AwsTransferFamilyListDirectories {
         Response time: approximately 3s
         Sync/Async: Asynchronous (non-blocking call).
      */
-    public static DirectoryListingResponse startDirectoryListing(TransferClient transferClient, String connectorId, String remotePath) {
+    public static DirectoryListingResponse startDirectoryListing(TransferClient transferClient, FileTransferRequest fileTransferRequest) {
         try {
             StartDirectoryListingRequest request = StartDirectoryListingRequest.builder()
-                    .connectorId(connectorId)
-                    .outputDirectoryPath("/" + BUCKET_NAME + "/test-pfs")  // Local path to store the listing results
-                    .remoteDirectoryPath(remotePath)  // Path in the remote SFTP server
+                    .connectorId(fileTransferRequest.getConnectorId())
+                    .outputDirectoryPath("/" + fileTransferRequest.getBucketName() + fileTransferRequest.getLocalDir())  // Local path to store the listing results "/test-pfs"
+                    .remoteDirectoryPath(fileTransferRequest.getRemoteDir())  // Path in the remote SFTP server where files are fetched from
                     .build();
 
             // Start directory listing

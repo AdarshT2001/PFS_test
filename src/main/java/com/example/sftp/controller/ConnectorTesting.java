@@ -22,7 +22,6 @@ import java.util.List;
 @Slf4j
 public class ConnectorTesting {
     private static final String connectorId = "c-32561b335ad048fe8";
-    private static final String remotePath = "/sftpfiles";
 
     private final AwsTransferFamilyListDirectories awsTransferFamilyListDirectories;
 
@@ -166,10 +165,10 @@ public class ConnectorTesting {
      response time: 4.78sec
     */
 
-    @GetMapping("/connectors/startDirectoryListing")
-    public DirectoryListingResponse startDirectoryListing() {
+    @PostMapping("/connectors/startDirectoryListing")
+    public DirectoryListingResponse startDirectoryListing(@RequestBody FileTransferRequest fileTransferRequest) {
         log.info("Starting directory listing AWS Transfer Family transfer");
         TransferClient transferClient = AwsTransferFamilyListDirectories.createTransferClient();
-        return AwsTransferFamilyListDirectories.startDirectoryListing(transferClient, connectorId, remotePath);
+        return AwsTransferFamilyListDirectories.startDirectoryListing(transferClient,fileTransferRequest);
     }
 }
