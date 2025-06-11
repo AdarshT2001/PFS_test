@@ -3,6 +3,7 @@ package com.example.sftp;
 import com.example.sftp.dto.request.ConnectorUpdateRequest;
 import com.example.sftp.dto.request.DirectoryListingRequest;
 import com.example.sftp.dto.request.FileTransferRequest;
+import com.example.sftp.dto.request.TransferMonitorRequest;
 import com.example.sftp.dto.response.ConnectorDescriptionResponse;
 import com.example.sftp.dto.response.ConnectorResponse;
 import com.example.sftp.dto.response.DirectoryListingResponse;
@@ -590,12 +591,12 @@ public class AwsTransferFamilyListDirectories {
         Sync/Async: Synchronous (blocking call).
      */
 
-    public static List<MonitoringTransferResultsResponse> monitorTransfer(TransferClient transferClient, String connectorId, String transferId) {
+    public static List<MonitoringTransferResultsResponse> monitorTransfer(TransferClient transferClient, TransferMonitorRequest transferMonitorRequest) {
         try {
             ListFileTransferResultsRequest request = ListFileTransferResultsRequest.builder()
-                    .connectorId(connectorId)
-                    .transferId(transferId)
-                    .maxResults(10)
+                    .connectorId(transferMonitorRequest.getConnectorId())
+                    .transferId(transferMonitorRequest.getTransferId())
+                    .maxResults(transferMonitorRequest.getMaxRecords())
                     .build();
 
             List<MonitoringTransferResultsResponse> results = new ArrayList<>();
@@ -614,7 +615,7 @@ public class AwsTransferFamilyListDirectories {
             return results;
         } catch (Exception e) {
             System.err.println("Failed to monitor transfer: " + e.getMessage());
-            System.out.println("Mock transfer status: COMPLETED for transfer ID " + transferId);
+            System.out.println("Mock transfer status: COMPLETED for transfer ID " + transferMonitorRequest.getTransferId());
         }
         return null;
     }

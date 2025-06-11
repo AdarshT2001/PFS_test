@@ -5,6 +5,7 @@ import com.example.sftp.AwsTransferFamilyListDirectories;
 import com.example.sftp.dto.request.ConnectorUpdateRequest;
 import com.example.sftp.dto.request.DirectoryListingRequest;
 import com.example.sftp.dto.request.FileTransferRequest;
+import com.example.sftp.dto.request.TransferMonitorRequest;
 import com.example.sftp.dto.response.ConnectorDescriptionResponse;
 import com.example.sftp.dto.response.ConnectorResponse;
 import com.example.sftp.dto.response.DirectoryListingResponse;
@@ -134,11 +135,11 @@ public class ConnectorTesting {
     }
     Response time: 1.8sec
      */
-    @GetMapping("/connectors/monitor")
-    public List<MonitoringTransferResultsResponse> monitorTransfer(@RequestParam(name = "transferId") String transferId) {
+    @PostMapping("/connectors/monitor")
+    public List<MonitoringTransferResultsResponse> monitorTransfer(@RequestBody TransferMonitorRequest transferMonitorRequest) {
         log.info("Monitoring Transfer");
         TransferClient transferClient = AwsTransferFamilyListDirectories.createTransferClient();
-        return AwsTransferFamilyListDirectories.monitorTransfer(transferClient, connectorId, transferId);
+        return AwsTransferFamilyListDirectories.monitorTransfer(transferClient, transferMonitorRequest);
     }
 
     /*
