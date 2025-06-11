@@ -114,7 +114,7 @@ public class ConnectorTesting {
     response time: 2sec
    */
     @PostMapping(value = "/inbound/transfer", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String startInboundTransfer(@RequestBody FileTransferRequest fileTransferRequest){
+    public String startInboundTransfer(@RequestBody FileTransferRequest fileTransferRequest) throws Exception {
         log.info("Starting AWS Transfer Family inbound transfer");
         TransferClient transferClient = awsTransferFamilyListDirectories.createTransferClient();
         return awsTransferFamilyListDirectories.startInboundTransfer(transferClient, fileTransferRequest);
@@ -156,7 +156,7 @@ public class ConnectorTesting {
     * response time: 2.57sec*/
 
     @PostMapping(value = "/outbound/transfer", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String startOutboundTransfer(@RequestBody FileTransferRequest fileTransferRequest){
+    public String startOutboundTransfer(@RequestBody FileTransferRequest fileTransferRequest) throws Exception {
         log.info("Starting AWS Transfer Family outbound transfer");
         TransferClient transferClient = awsTransferFamilyListDirectories.createTransferClient();
         return awsTransferFamilyListDirectories.startOutboundTransfer(transferClient, fileTransferRequest);

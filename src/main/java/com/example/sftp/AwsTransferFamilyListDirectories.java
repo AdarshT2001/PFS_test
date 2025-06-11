@@ -12,6 +12,7 @@ import lombok.val;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.model.CreateSecretRequest;
@@ -504,7 +505,8 @@ public class AwsTransferFamilyListDirectories {
         Sync/Async: Asynchronous. (Use startFileTransfer and check the transfer status separately).
      */
 
-    public String startInboundTransfer(TransferClient transferClient, FileTransferRequest fileTransferRequest) {
+    public String startInboundTransfer(TransferClient transferClient, FileTransferRequest fileTransferRequest) throws Exception {
+        String transferId = null;
         try {
             StartFileTransferRequest request = StartFileTransferRequest.builder()
                     .connectorId(fileTransferRequest.getConnectorId())
@@ -512,13 +514,16 @@ public class AwsTransferFamilyListDirectories {
 //                    .remoteDirectoryPath(fileTransferRequest.getRemoteDir())
                     .retrieveFilePaths(fileTransferRequest.getFileNames())
                     .build();
-            StartFileTransferResponse response = transferClient.startFileTransfer(request);
-            String transferId = response.transferId();
-            System.out.println("Started inbound transfer: " + transferId);
+            if(testConnection(transferClient,fileTransferRequest.getConnectorId())){
+                StartFileTransferResponse response = transferClient.startFileTransfer(request);
+                transferId = response.transferId();
+                System.out.println("Started inbound transfer: " + transferId);
+
+            }
             return transferId;
         } catch (Exception e) {
             System.err.println("Failed to start inbound transfer: " + e.getMessage());
-            return "mock-transfer-id-" + System.currentTimeMillis();
+            throw new Exception(e.getMessage());
         }
     }
 
@@ -548,20 +553,23 @@ public class AwsTransferFamilyListDirectories {
         Response time: approximately 3s for one file
         Sync/Async: Asynchronous. (Use startFileTransfer and check the transfer status separately).
      */
-    public static String startOutboundTransfer(TransferClient transferClient,FileTransferRequest fileTransferRequest) {
+    public static String startOutboundTransfer(TransferClient transferClient,FileTransferRequest fileTransferRequest) throws Exception {
+        String transferId = null;
         try {
             StartFileTransferRequest request = StartFileTransferRequest.builder()
                     .connectorId(fileTransferRequest.getConnectorId())
                     .sendFilePaths(fileTransferRequest.getSendFilePaths())
                     .remoteDirectoryPath(fileTransferRequest.getRemoteDir())
                     .build();
-            StartFileTransferResponse response = transferClient.startFileTransfer(request);
-            String transferId = response.transferId();
-            System.out.println("Started outbound transfer: " + transferId);
+            if(testConnection(transferClient,fileTransferRequest.getConnectorId())){
+                StartFileTransferResponse response = transferClient.startFileTransfer(request);
+                transferId = response.transferId();
+                System.out.println("Started outbound transfer: " + transferId);
+            }
             return transferId;
         } catch (Exception e) {
             System.err.println("Failed to start outbound transfer: " + e.getMessage());
-            return "mock-transfer-id-" + System.currentTimeMillis();
+            throw new Exception(e.getMessage());
         }
     }
 
@@ -692,5 +700,37 @@ public class AwsTransferFamilyListDirectories {
         // Add other fields from SftpConnectorConfig as necessary
 
         return map;
+    }
+
+    /*
+    * Purpose: Used to check connection between sftp server and s3
+    * Parameters: Connector ID and TransferClient.
+    */
+    public static boolean testConnection(TransferClient transferClient, String connectorId) throws RuntimeException {
+        try {
+            // Create a request to test the connection
+            TestConnectionRequest request = TestConnectionRequest.builder()
+                    .connectorId(connectorId)  // Provide your connector ID
+                    .build();
+
+            // Call the TestConnection API
+            TestConnectionResponse response = transferClient.testConnection(request);
+
+            // If the connection is successful, check the response status
+            if ("OK".equals(response.status())) {
+                System.out.println("Connection Test Succeeded for connector ID: " + connectorId);
+                return true; // Return true if connection is successful
+            } else {
+                // If the connection fails, handle the error gracefully
+                throw new RuntimeException("Connection Test Failed for connector ID: " + connectorId);
+            }
+
+        } catch (TransferException e) {
+            // Handle the TransferException that is thrown by the AWS SDK if the connection test fails
+            throw new RuntimeException("Connection test failed due to AWS Transfer exception: " + e.getMessage(), e);
+        } catch (Exception e) {
+            // Catch any other unexpected errors and wrap them in a RuntimeException
+            throw new RuntimeException("Connection Test failed due to unexpected error: " + e.getMessage(), e);
+        }
     }
 }
