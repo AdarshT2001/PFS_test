@@ -1,0 +1,13 @@
+aws:
+  accessKey: xx
+  secretKey: xx
+  uri: http://localhost:4566
+  sqs:
+    endpoint: http://localhost:4566  # Correct endpoint URL (base URL for AWS SQS)
+    queue:
+      name: "my-queue.fifo"
+
+spring:
+  config:
+    activate:
+      on-profile: dev

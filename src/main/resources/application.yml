@@ -1,0 +1,13 @@
+aws:
+  region: us-east-1
+  sqs:
+    queue:
+      max-memory-usage: 1000000
+      part-size: 1000000
+      max-concurrent-messages: 10
+      max-messages-per-poll: 10
+      message-visibility-seconds: 1200
+
+spring:
+  profiles:
+    active: dev

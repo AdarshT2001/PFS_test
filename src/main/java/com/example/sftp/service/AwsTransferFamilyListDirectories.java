@@ -47,7 +47,7 @@ public class AwsTransferFamilyListDirectories {
     private static final String TEST_SECRET_ID = "";
     private static final String TEST_ACC_KEY = "";
     private static final String TEST_SECRET_KEY = "";
-    
+
 
     /*
             Purpose: Initializes the TransferClient using STS (Security Token Service) credentials. This is needed to perform operations in AWS Transfer Family, like creating connectors or starting file transfers.
