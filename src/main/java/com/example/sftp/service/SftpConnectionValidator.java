@@ -1,9 +1,8 @@
-package com.example.sftp;
+package com.example.sftp.service;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.SftpException;
 
 import java.util.Properties;
 

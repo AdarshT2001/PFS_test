@@ -1,7 +1,6 @@
 package com.example.sftp.controller;
 
 
-import com.example.sftp.AwsTransferFamilyListDirectories;
 import com.example.sftp.dto.request.ConnectorUpdateRequest;
 import com.example.sftp.dto.request.DirectoryListingRequest;
 import com.example.sftp.dto.request.FileTransferRequest;
@@ -10,6 +9,7 @@ import com.example.sftp.dto.response.ConnectorDescriptionResponse;
 import com.example.sftp.dto.response.ConnectorResponse;
 import com.example.sftp.dto.response.DirectoryListingResponse;
 import com.example.sftp.dto.response.MonitoringTransferResultsResponse;
+import com.example.sftp.service.AwsTransferFamilyListDirectories;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;

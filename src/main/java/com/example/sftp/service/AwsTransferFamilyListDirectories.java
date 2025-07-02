@@ -1,4 +1,4 @@
-package com.example.sftp;
+package com.example.sftp.service;
 
 import com.example.sftp.dto.request.ConnectorUpdateRequest;
 import com.example.sftp.dto.request.DirectoryListingRequest;
@@ -12,8 +12,8 @@ import lombok.val;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.model.CreateSecretRequest;
 import software.amazon.awssdk.services.secretsmanager.model.CreateSecretResponse;
@@ -26,6 +26,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.transfer.model.Tag;
 
 
+import java.io.*;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -666,6 +667,7 @@ public class AwsTransferFamilyListDirectories {
                             "OutputFileName": ""
                         }
         Response time: approximately 3s
+        Default maxItems: 1000
         Sync/Async: Asynchronous (non-blocking call).
      */
     public static DirectoryListingResponse startDirectoryListing(TransferClient transferClient, DirectoryListingRequest directoryListingRequest) {
@@ -679,12 +681,45 @@ public class AwsTransferFamilyListDirectories {
 
             // Start directory listing
             StartDirectoryListingResponse response = transferClient.startDirectoryListing(request);
-
+                try {
+                    String fileKey = "test-pfs-10/" + response.outputFileName();  // This is the key for the file in the S3 bucket.
+                    S3Client s3Client = createS3Client();
+                    // Download the file to the specified local path
+                    InputStream inputStream = s3Client.getObject(GetObjectRequest.builder().bucket(BUCKET_NAME).key(fileKey).build());
+                    downloadFile(inputStream, "/Users/adarshteeparthi/Downloads/temp.json");  // Download the file to the specified local path
+                    // If no exception is thrown, the file exists
+                    System.out.println("Response file exists in S3: " + fileKey);
+                } catch (NoSuchKeyException e) {
+                    System.out.println("Response file does not exist in S3 yet: " + response.outputFileName());
+                } catch (Exception e) {
+                    System.err.println("Error checking if response file exists in S3: " + e.getMessage());
+                }
             // Return the listing ID to track the status
             return DirectoryListingResponse.builder().ListingId(response.listingId()).outputFileName(response.outputFileName()).build();
         } catch (Exception e) {
             System.err.println("Error starting directory listing: " + e.getMessage());
             return null;
+        }
+    }
+    public static void downloadFile(InputStream inputStream, String outputFilePath) throws IOException {
+        try (OutputStream outputStream = new FileOutputStream(outputFilePath)) {
+            // Buffer for reading and writing
+            byte[] buffer = new byte[4096]; // 4 KB buffer, you can adjust the size as needed
+            int bytesRead;
+
+            // Read from the InputStream and write to the OutputStream (local file)
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            // Close the InputStream if it was provided
+            if (inputStream != null) {
+                inputStream.close();
+            }
         }
     }
 
