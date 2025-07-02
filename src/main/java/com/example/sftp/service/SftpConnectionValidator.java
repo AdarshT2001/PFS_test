@@ -55,19 +55,4 @@ public class SftpConnectionValidator {
 
         return isValid;
     }
-
-    public static void main(String[] args) {
-        String sftpHost = "sftp.backflipt.com";  // Replace with your SFTP host
-        int sftpPort = 22;           // Replace with your SFTP port (default: 22)
-        String username = "mft_user"; // Replace with your SFTP username
-        String password = "mft_password"; // Replace with your SFTP password
-
-        boolean isConnectionValid = validateSftpConnection(sftpHost, sftpPort, username, password);
-
-        if (isConnectionValid) {
-            System.out.println("SFTP connection validated successfully.");
-        } else {
-            System.out.println("SFTP connection validation failed.");
-        }
-    }
 }
